@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  bot:
+    container_name: "schedule_bot"
+    restart: always
+    image: node:latest
+    working_dir: /app
+    environment:
+      - TOKEN=${TOKEN}
+    volumes:
+      - ./:/app
+      - db-volume:/db
+    command: sh -c "npm install telegraf cron better-sqlite3 && node --env-file=.env index.js"
+    networks:
+      schedule_network:
+        ipv4_address: '192.168.137.15'
+
+
+
+volumes:
+  db-volume:
+    driver: local
+    driver_opts:
+      type: none
+      device: /root/schedule-bot
+      o: bind
+
+networks:
+  schedule_network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.137.0/24
+          gateway: 192.168.137.1
