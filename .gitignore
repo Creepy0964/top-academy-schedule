@@ -1,3 +1,5 @@
 node_modules
 .env
 ecosystem.schedule-bot.js
+users.txt
+errors.log

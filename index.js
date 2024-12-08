@@ -17,39 +17,49 @@ const renew = new CronJob('0 6 * * 1-5,7', () => {
     });
 }, null, true, 'Europe/Moscow');
 
-const schedule_everyday = new CronJob('0 7 * * 1-5', () => { 
+const schedule_everyday = new CronJob('0 7 * * 1-5', async () => { 
     let x = new Date();
     let tablename = db.prepare(`SELECT name FROM sqlite_master WHERE type = 'table'`).get();
     let schedule = db.prepare(`SELECT schedule FROM ${tablename.name} WHERE day = ${x.getDay()}`).get();
     for(const x of users) {
-        bot.telegram.sendMessage(x, `Расписание на сегодня\n\n${schedule.schedule}`);
+        await bot.telegram.sendMessage(x, `Расписание на сегодня\n\n${schedule.schedule}`);
     }
 }, null, true, 'Europe/Moscow');
 
-bot.command('info', (ctx) => {
-    ctx.reply('Разработано @creepy0964 по заказу @creepy0964 за бюджет в банку энергетика');
+bot.command('info', async (ctx) => {
+    await ctx.reply('Разработано @creepy0964 по заказу @creepy0964 за бюджет в банку энергетика');
 });
 
-bot.command('start', (ctx) => {
-    ctx.reply(`Команды:\n/schedule — расписание на сегодня\n/schedule_tomorrow — расписание на завтра\n/info — инфо`);
+bot.command('start', async (ctx) => {
+    await ctx.reply(`Команды:\n/schedule — расписание на сегодня\n/schedule_tomorrow — расписание на завтра\n/info — инфо`);
 });
 
-bot.command('schedule', (ctx) => {
+bot.command('schedule', async (ctx) => {
     let x = new Date();
+    if(x.getDay() == 6 || x.getDay() == 0) {
+        await ctx.reply('На сегодня расписания нет!');
+        return;
+    }
     let tablename = db.prepare(`SELECT name FROM sqlite_master WHERE type = 'table'`).get();
     let schedule = db.prepare(`SELECT schedule FROM ${tablename.name} WHERE day = ${x.getDay()}`).get();
-    ctx.reply(`Расписание на сегодня\n\n${schedule.schedule}`);
+    await ctx.reply(`Расписание на сегодня\n\n${schedule.schedule}`);
 });
 
-bot.command('schedule_tomorrow', (ctx) => {
-    let x = new Date();
-    let tablename = db.prepare(`SELECT name FROM sqlite_master WHERE type = 'table'`).get();
-    let schedule = db.prepare(`SELECT schedule FROM ${tablename.name} WHERE day = ${x.getDay() + 1}`).get();
-    ctx.reply(`Расписание на завтра\n\n${schedule.schedule}`);
+bot.command('schedule_tomorrow', async (ctx) => {
+    let x = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
+    let tablename = db.prepare(`SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name DESC`).get();
+    let schedule = db.prepare(`SELECT schedule FROM ${tablename.name} WHERE day = ${x.getDay()}`).get();
+    if(x.getDay() == 6 || x.getDay() == 0) {
+        let schedule = db.prepare(`SELECT schedule FROM ${tablename.name} WHERE day = 1`).get();
+        await ctx.reply(`Расписание на понедельник\n\n${schedule.schedule}`);
+        return;
+    }
+    await ctx.reply(`Расписание на завтра\n\n${schedule.schedule}`);
 });
 
 bot.catch((err) => {
-    appendFileSync('errors.log', err);
+    console.log(err);
+    appendFileSync('errors.log', `${err.toString()}\n\n`);
 });
 
 bot.launch();

@@ -51,7 +51,7 @@ def get_schedule() -> list[str]:
     
     time.sleep(3)
     
-    if weekday == 6:
+    if weekday == 6 or weekday == 5:
         driver.find_element(By.XPATH, '/html/body/mystat/ng-component/ng-component/div/div[3]/div[2]/ng-component/ng-component/div/div/div[2]/div/div[2]/div/div[1]/div[2]/span[3]').click()
 
     time.sleep(5)
