@@ -19,7 +19,7 @@ const renew = new CronJob('0 6 * * 1-5,7', () => {
 
 const schedule_everyday = new CronJob('0 7 * * 1-5', async () => { 
     let x = new Date();
-    let tablename = db.prepare(`SELECT name FROM sqlite_master WHERE type = 'table'`).get();
+    let tablename = db.prepare(`SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name DESC`).get();
     let schedule = db.prepare(`SELECT schedule FROM ${tablename.name} WHERE day = ${x.getDay()}`).get();
     for(const x of users) {
         await bot.telegram.sendMessage(x, `Расписание на сегодня\n\n${schedule.schedule}`);
@@ -40,7 +40,7 @@ bot.command('schedule', async (ctx) => {
         await ctx.reply('На сегодня расписания нет!');
         return;
     }
-    let tablename = db.prepare(`SELECT name FROM sqlite_master WHERE type = 'table'`).get();
+    let tablename = db.prepare(`SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name DESC`).get();
     let schedule = db.prepare(`SELECT schedule FROM ${tablename.name} WHERE day = ${x.getDay()}`).get();
     await ctx.reply(`Расписание на сегодня\n\n${schedule.schedule}`);
 });
